@@ -150,7 +150,7 @@ class Blockchain {
                     throw new Error('Message verification failed')
                 }
 
-                // along with the star, we store the walletAddress too
+                // along with the star, we store the owner wallet address too
                 const data = {
                     owner: address,
                     star: star,

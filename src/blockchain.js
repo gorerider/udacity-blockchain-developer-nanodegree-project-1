@@ -88,9 +88,16 @@ class Blockchain {
                self.height = nextHeight
 
                // validate chain
-               await self.validateChain()
-
-               resolve(block)
+               const errorLog = await self.validateChain()
+               if (errorLog.length === 0) {
+                   resolve(block)
+               } else {
+                   // create an error to add the list of errors to it,
+                   // so we have access to it in the controller
+                   const blockchainInvalidError = new Error("Blockchain is invalid")
+                   blockchainInvalidError.errorLog = errorLog
+                   throw blockchainInvalidError
+               }
            } catch (e) {
                // this try-catch is very broad, but should suffice for this project
                reject(e)
@@ -156,8 +163,7 @@ class Blockchain {
                     star: star,
                 }
 
-                const block = await self._addBlock(new BlockClass.Block(data))
-                resolve(block)
+                resolve(await self._addBlock(new BlockClass.Block(data)))
             } catch (e) {
                 reject(e)
             }
@@ -254,13 +260,7 @@ class Blockchain {
                 }
             }
 
-            if (errorLog.length > 0) {
-                const error = new Error('Blockchain is compromised')
-                error.errorLog = errorLog
-                reject(error)
-            } else {
-                resolve(true)
-            }
+            resolve(errorLog)
         });
     }
 
